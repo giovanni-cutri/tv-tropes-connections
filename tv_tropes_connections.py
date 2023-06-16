@@ -160,7 +160,7 @@ def neighbors_for_work(work):
         for work_id in works_ids:
             neighbors.add((trope_id, work_id))
 
-        sleep(0.5)
+        sleep(1)
 
     return neighbors
 
