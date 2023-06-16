@@ -148,7 +148,7 @@ def neighbors_for_work(work):
 
         works_ids = {base_url + work.attrs["href"] for work in soup.select("ul li a[class='twikilink']") if not "/Main/" in str(work) and not "/Creator/" in str(work)}
 
-        title = get_name(work).replace(" ", "")
+        title = get_name(trope_id).replace(" ", "")
         works_subpages = [base_url + work_subpage.attrs["href"] for work_subpage in soup.select(f"ul li a[class='twikilink'][href*='{title}']")]
 
         for work_subpage in works_subpages:
