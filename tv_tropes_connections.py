@@ -4,7 +4,8 @@ import lxml
 import requests
 import sys
 import validators
-from time import sleep
+import urllib.parse
+import re
 
 from util import Node, StackFrontier, QueueFrontier
 
@@ -72,7 +73,7 @@ def shortest_path(source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for action,state in neighbors_for_work(node.state):
+        for action, state in neighbors_for_work(node.state):
 
             if not frontier.contains_state(state) and state not in explored:
 
@@ -131,7 +132,7 @@ def neighbors_for_work(work):
 
     tropes_ids = {base_url + page.attrs["href"] for page in soup.select("ul li a[class='twikilink']") if "/Main/" in str(page)}  # set comprehension
 
-    title = get_name(work).replace(" ", "").replace("'", "")
+    title = get_name(work)
     tropes_subpages = [base_url + trope_subpage.attrs["href"] for trope_subpage in soup.select(f"ul li a[class='twikilink'][href*='{title}']")]
 
     for trope_subpage in tropes_subpages:
@@ -148,7 +149,7 @@ def neighbors_for_work(work):
 
         works_ids = {base_url + work.attrs["href"] for work in soup.select("ul li a[class='twikilink']") if not "/Main/" in str(work) and not "/Creator/" in str(work)}
 
-        title = get_name(trope_id).replace(" ", "").replace("'", "")
+        title = get_name(trope_id)
         works_subpages = [base_url + work_subpage.attrs["href"] for work_subpage in soup.select(f"ul li a[class='twikilink'][href*='{title}']")]
 
         for work_subpage in works_subpages:
@@ -160,8 +161,6 @@ def neighbors_for_work(work):
         for work_id in works_ids:
             neighbors.add((trope_id, work_id))
 
-        sleep(1)
-
     return neighbors
 
 
@@ -170,9 +169,7 @@ def get_name(id):
     Returns the corresponding name for the work / trope provided as a parameter
     """
 
-    res = requests.get(id)
-    soup = bs4.BeautifulSoup(res.text, "lxml")
-    return soup.select("title")[0].getText().split(" - TV Tropes")[0].split("(")[0].strip()
+    return urllib.parse.unquote(re.sub(r"(?<=\w)([A-Z])", r" \1", id.split("/")[-1]))
 
 
 def print_result(path, source):
